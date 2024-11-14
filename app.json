@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "user-profile",
-    "slug": "user-profile",
+    "name": "contact-manager",
+    "slug": "contact-manager",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "contactmanager",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -14,14 +14,21 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ulisespgtz.userprofile"
+      "bundleIdentifier": "com.ulisespgtz.contactmanager",
+      "infoPlist": {
+        "NSContactsUsageDescription": "This app needs access to your contacts to manage them."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.ulisespgtz.userprofile"
+      "package": "com.ulisespgtz.contactmanager",
+      "permissions": [
+        "READ_CONTACTS",
+        "WRITE_CONTACTS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -29,6 +36,12 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Allow Contact Manager to access your contacts."
+        }
+      ],
       "expo-router",
       "expo-font",
       "expo-build-properties"
