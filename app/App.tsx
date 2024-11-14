@@ -1,20 +1,12 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
-import AddEditContactScreen from './AddEditContactScreen';
-import ContactListScreen from './ContactListScreen';
+
+import { Stack } from "expo-router";
 
 
-
-const Stack = createNativeStackNavigator();
-
-export default function App() {
+export default function RootLayout() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Contacts" component={ContactListScreen} />
-        <Stack.Screen name="AddEditContact" component={AddEditContactScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+      <Stack>
+        <Stack.Screen name="ContactListScreen" options={{headerShown: false}} />
+        <Stack.Screen name="AddEditContactScreen"/>
+      </Stack>
   );
 }
