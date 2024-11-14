@@ -4,6 +4,8 @@ import React from 'react';
 import AddEditContactScreen from './AddEditContactScreen';
 import ContactListScreen from './ContactListScreen';
 
+
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {

@@ -1,11 +1,24 @@
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Contacts from 'expo-contacts';
 import React, { useEffect, useState } from 'react';
 import { Button, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+// Define the navigation stack params
+type RootStackParamList = {
+  ContactList: undefined;
+  AddEditContact: { contact?: Contacts.Contact }; // Optional contact param
+};
+
+// Type the navigation prop for this screen
+type ContactListScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'ContactList'
+>;
+
 export default function ContactListScreen() {
   const [contacts, setContacts] = useState<Contacts.Contact[]>([]);
-  const navigation = useNavigation();
+  const navigation = useNavigation<ContactListScreenNavigationProp>(); // Typed navigation
 
   useEffect(() => {
     (async () => {
@@ -28,10 +41,10 @@ export default function ContactListScreen() {
     <View style={styles.container}>
       <FlatList
         data={contacts}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => navigation.navigate('AddEditContact', { contact: item })}
+            onPress={() => navigation.navigate('AddEditContact', { contact: item })} // Pass the contact param
             style={styles.contactItem}
           >
             <Text style={styles.contactName}>{item.name}</Text>
@@ -47,7 +60,7 @@ export default function ContactListScreen() {
       />
       <Button
         title="Add New Contact"
-        onPress={() => navigation.navigate('AddEditContact')}
+        onPress={() => navigation.navigate('AddEditContact')} // Navigate to AddEditContact without params
       />
     </View>
   );
