@@ -6,16 +6,16 @@ export default function AppNavigator() {
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#f4511e', // Set a consistent header background color.
+          backgroundColor: '#f4511e', // Color de fondo del encabezado.
         },
-        headerTintColor: '#fff', // Set header text color.
+        headerTintColor: '#fff', // Color del texto del encabezado.
         headerTitleStyle: {
-          fontWeight: 'bold', // Bold header titles.
+          fontWeight: 'bold', // Texto del encabezado en negrita.
         },
       }}
     >
       <Stack.Screen
-        name="contacts"
+        name="Contacts"
         options={{
           headerTitle: 'Contacts',
           headerShown: true,

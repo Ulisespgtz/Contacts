@@ -1,46 +1,56 @@
-import { useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import * as Contacts from 'expo-contacts';
 import { Stack, useNavigation } from 'expo-router';
 import React from 'react';
 import {
+  Alert,
   Image,
-  PermissionsAndroid,
+  Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import Contacts from 'react-native-contacts';
-;
+
+type ContactDetailsParams = {
+  data: {
+    id: string; // Expo Contacts usa `id` para identificar contactos
+    name: string; // Nombre del contacto
+    phoneNumbers: { number: string }[]; // Números de teléfono
+  };
+};
 
 const ContactDetails: React.FC = () => {
   const navigation = useNavigation();
-  const route = useRoute();
+  const route = useRoute<RouteProp<{ params: ContactDetailsParams }, 'params'>>();
 
-  const contactData = route.params?.data as {
-    displayName: string;
-    phoneNumbers: { number: string }[];
-    recordID: string;
-  };
+  const contactData = route.params?.data;
 
-  const requestDeleteContactPermission = async () => {
+  const handleDeleteContact = async () => {
     try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_CONTACTS,
-        {
-          title: 'Contacts',
-          message: 'This app needs permission to delete contacts.',
-          buttonPositive: 'Allow',
-        }
+      Alert.alert(
+        'Delete Contact',
+        `Are you sure you want to delete ${contactData.name}?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              const result = await Contacts.removeContactAsync(contactData.id);
+              if (result) {
+                Alert.alert('Success', 'Contact deleted successfully');
+                navigation.goBack();
+              } else {
+                Alert.alert('Error', 'Failed to delete the contact');
+              }
+            },
+          },
+        ]
       );
-
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        await Contacts.deleteContact({ recordID: contactData.recordID });
-        navigation.goBack();
-      } else {
-        console.warn('Permission denied');
-      }
     } catch (error) {
       console.error('Error deleting contact:', error);
+      Alert.alert('Error', 'An unexpected error occurred while deleting the contact');
     }
   };
 
@@ -59,19 +69,29 @@ const ContactDetails: React.FC = () => {
         source={require('../images/user.png')}
         style={styles.userImage}
       />
-      <Text style={styles.displayName}>{contactData.displayName}</Text>
+      <Text style={styles.displayName}>{contactData.name}</Text>
       <View style={styles.contactInfo}>
         <Text style={styles.phoneNumber}>
-          {contactData.phoneNumbers[0]?.number}
+          {contactData.phoneNumbers?.[0]?.number || 'No number available'}
         </Text>
         <View style={styles.actions}>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              contactData.phoneNumbers?.[0]?.number &&
+              Linking.openURL(`sms:${contactData.phoneNumbers[0].number}`)
+            }
+          >
             <Image
               source={require('../images/message.png')}
               style={styles.actionIcon}
             />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              contactData.phoneNumbers?.[0]?.number &&
+              Linking.openURL(`tel:${contactData.phoneNumbers[0].number}`)
+            }
+          >
             <Image
               source={require('../images/call.png')}
               style={styles.actionIcon}
@@ -81,7 +101,7 @@ const ContactDetails: React.FC = () => {
       </View>
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={requestDeleteContactPermission}
+        onPress={handleDeleteContact}
       >
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>

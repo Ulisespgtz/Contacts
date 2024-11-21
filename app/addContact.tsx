@@ -1,15 +1,15 @@
+import * as Contacts from 'expo-contacts';
 import { useNavigation } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   Image,
-  PermissionsAndroid,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import Contacts from 'react-native-contacts';
 
 const AddContact: React.FC = () => {
   const [name, setName] = useState<string>('');
@@ -23,42 +23,31 @@ const AddContact: React.FC = () => {
     });
   }, [navigation]);
 
-  const requestPermissionAndAddContact = async () => {
+  const addContact = async () => {
     try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_CONTACTS,
-        {
-          title: 'Contacts',
-          message: 'This app would like to add a contact.',
-          buttonPositive: 'OK',
-        }
-      );
-
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        const newPerson = {
-          emailAddresses: [
-            {
-              label: 'work',
-              email,
-            },
-          ],
-          phoneNumbers: [
-            {
-              label: 'mobile',
-              number,
-            },
-          ],
-          familyName: name,
-          givenName: name,
+      const { status } = await Contacts.requestPermissionsAsync();
+      if (status === 'granted') {
+        const newPerson: Contacts.Contact = {
+          contactType: 'person', // Se agrega el campo requerido
+          name,
+          emails: email ? [{ label: 'work', email }] : undefined,
+          phoneNumbers: number ? [{ label: 'mobile', number }] : undefined,
         };
 
-        await Contacts.addContact(newPerson);
-        navigation.goBack();
+        const contactId = await Contacts.addContactAsync(newPerson);
+
+        if (contactId) {
+          Alert.alert('Success', 'Contact added successfully');
+          navigation.goBack();
+        } else {
+          Alert.alert('Error', 'Failed to add contact');
+        }
       } else {
-        console.error('Permission denied');
+        Alert.alert('Permission Denied', 'Cannot add contacts without permission');
       }
     } catch (error) {
       console.error('Error adding contact:', error);
+      Alert.alert('Error', 'An unexpected error occurred');
     }
   };
 
@@ -104,7 +93,7 @@ const AddContact: React.FC = () => {
 
       <TouchableOpacity
         style={styles.saveButton}
-        onPress={requestPermissionAndAddContact}
+        onPress={addContact}
       >
         <Text style={styles.saveButtonText}>Save Contact</Text>
       </TouchableOpacity>
