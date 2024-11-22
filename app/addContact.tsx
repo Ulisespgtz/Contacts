@@ -24,30 +24,39 @@ const AddContact: React.FC = () => {
   }, [navigation]);
 
   const addContact = async () => {
+    if (!name || !email || !number) {
+      Alert.alert('Warning', 'Please fill in all the information.');
+      return;
+    }
+
     try {
       const { status } = await Contacts.requestPermissionsAsync();
-      if (status === 'granted') {
-        const newPerson: Contacts.Contact = {
-          contactType: 'person', // Se agrega el campo requerido
-          name,
-          emails: email ? [{ label: 'work', email }] : undefined,
-          phoneNumbers: number ? [{ label: 'mobile', number }] : undefined,
-        };
 
-        const contactId = await Contacts.addContactAsync(newPerson);
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Contact permissions are required to add a contact.');
+        return;
+      }
 
-        if (contactId) {
-          Alert.alert('Success', 'Contact added successfully');
+      const newContact: Contacts.Contact = {
+        contactType: Contacts.ContactTypes.Person, // Use the correct property name
+        name,
+        emails: [{ label: 'work', email }],
+        phoneNumbers: [{ label: 'mobile', number }],
+      };
+
+      const contactId = await Contacts.addContactAsync(newContact);
+
+      if (contactId) {
+        Alert.alert('Success', 'Contact saved successfully.');
+        if (navigation.canGoBack()) {
           navigation.goBack();
-        } else {
-          Alert.alert('Error', 'Failed to add contact');
         }
       } else {
-        Alert.alert('Permission Denied', 'Cannot add contacts without permission');
+        Alert.alert('Error', 'Failed to save the contact.');
       }
     } catch (error) {
       console.error('Error adding contact:', error);
-      Alert.alert('Error', 'An unexpected error occurred');
+      Alert.alert('Error', 'An unexpected error occurred.');
     }
   };
 

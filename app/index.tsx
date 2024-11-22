@@ -12,7 +12,15 @@ import {
 } from 'react-native';
 
 const ContactsScreen: React.FC = () => {
-  const [contactList, setContactList] = useState<Contacts.Contact[]>([]); // Estado para guardar los contactos
+  const [contactList, setContactList] = useState<Contacts.Contact[]>([
+    {
+      id: '1',
+      name: 'Ulises',
+      emails: [{ id: 'email1', email: 'ulises@gmail.com' }],
+      phoneNumbers: [{ id: 'phone1', number: '5585370026' }],
+    } as Contacts.Contact, // Contacto predeterminado
+  ]);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -22,7 +30,8 @@ const ContactsScreen: React.FC = () => {
         const { data } = await Contacts.getContactsAsync({
           fields: [Contacts.Fields.Emails, Contacts.Fields.PhoneNumbers],
         });
-        setContactList(data); // Actualiza la lista de contactos
+
+        setContactList((prevContacts) => [...prevContacts, ...data]); // Añade los contactos del dispositivo
       } else {
         console.warn('Permission denied');
       }
@@ -35,57 +44,57 @@ const ContactsScreen: React.FC = () => {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       <FlatList
-  data={contactList}
-  keyExtractor={(item) => item.id || `${item.name}-${Math.random()}`}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-      style={styles.contactItem}
-      onPress={() => {
-        router.push({
-          pathname: '/contactDetails',
-          params: { data: JSON.stringify(item) },
-        });
-      }}
-    >
-      <View style={styles.contactInfo}>
-        <Image
-          source={require('../images/user.png')}
-          style={styles.contactImage}
-        />
-        <View style={styles.contactText}>
-          <Text style={styles.contactName}>{item.name}</Text>
-          <Text style={styles.contactNumber}>
-            {item.phoneNumbers?.[0]?.number || 'No number'}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.actionButtons}>
-        <TouchableOpacity
-          onPress={() =>
-            item.phoneNumbers?.[0]?.number &&
-            Linking.openURL(`sms:${item.phoneNumbers[0].number}`)
-          }
-        >
-          <Image
-            source={require('../images/message.png')}
-            style={styles.actionIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() =>
-            item.phoneNumbers?.[0]?.number &&
-            Linking.openURL(`tel:${item.phoneNumbers[0].number}`)
-          }
-        >
-          <Image
-            source={require('../images/call.png')}
-            style={styles.actionIcon}
-          />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  )}
-/>
+        data={contactList}
+        keyExtractor={(item) => item.id || `${item.name}-${Math.random()}`}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.contactItem}
+            onPress={() => {
+              router.push({
+                pathname: '/contactDetails',
+                params: { data: JSON.stringify(item) },
+              });
+            }}
+          >
+            <View style={styles.contactInfo}>
+              <Image
+                source={require('../images/user.png')}
+                style={styles.contactImage}
+              />
+              <View style={styles.contactText}>
+                <Text style={styles.contactName}>{item.name}</Text>
+                <Text style={styles.contactNumber}>
+                  {item.phoneNumbers?.[0]?.number || 'No number'}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                onPress={() =>
+                  item.phoneNumbers?.[0]?.number &&
+                  Linking.openURL(`sms:${item.phoneNumbers[0].number}`)
+                }
+              >
+                <Image
+                  source={require('../images/message.png')}
+                  style={styles.actionIcon}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() =>
+                  item.phoneNumbers?.[0]?.number &&
+                  Linking.openURL(`tel:${item.phoneNumbers[0].number}`)
+                }
+              >
+                <Image
+                  source={require('../images/call.png')}
+                  style={styles.actionIcon}
+                />
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => router.push('/addContact')}
